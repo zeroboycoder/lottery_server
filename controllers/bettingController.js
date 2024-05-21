@@ -6,6 +6,28 @@ const moment = require("moment");
 exports.createBetting = async (req, res) => {
   try {
     const { playerName, playerPhone, agentId, betting } = req.body;
+
+    // Check the betting number is banned
+    const betSetting = await betSettingModel.findOne();
+    let hasBanNumbers = [];
+
+    if (betSetting) {
+      const banNumbers = betSetting.banNumbers || [];
+      for (const banNumber of banNumbers) {
+        betting.map(
+          (bet) =>
+            bet.betNumber === banNumber && hasBanNumbers.push(bet.betNumber)
+        );
+      }
+    }
+
+    if (hasBanNumbers.length > 0) {
+      return response.error(
+        res,
+        `${hasBanNumbers.join(", ")} numbers are banned.`
+      );
+    }
+
     // Create betting
     await bettingModel.create({
       playerName,
