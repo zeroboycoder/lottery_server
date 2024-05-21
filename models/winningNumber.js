@@ -12,6 +12,10 @@ const winningNumberSchema = new mongoose.Schema(
         required: true,
       },
     ],
+    date: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,

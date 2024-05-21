@@ -24,7 +24,10 @@ exports.adminRegister = async (req, res) => {
 
     // Sign the jwt
     const token = jwt.signJwt({ _id: newAdmin._id, admin: true });
-    return response.success(res, "Admin created successfully", { token });
+    return response.success(res, "Admin created successfully", {
+      token,
+      adminId: newAdmin._id,
+    });
   } catch (error) {
     console.log(error);
     return response.error(res, error.message);
@@ -49,7 +52,10 @@ exports.adminLogin = async (req, res) => {
 
     // Sign the jwt
     const token = jwt.signJwt({ _id: admin._id, admin: true });
-    return response.success(res, "Admin login successfully", { token });
+    return response.success(res, "Admin login successfully", {
+      token,
+      adminId: admin._id,
+    });
   } catch (error) {
     console.log(error);
     return response.error(res, error.message);
@@ -77,7 +83,10 @@ exports.agentRegister = async (req, res) => {
 
     // Sign the jwt
     const token = jwt.signJwt({ _id: newAgent._id, agent: true });
-    return response.success(res, "Agent created successfully", { token });
+    return response.success(res, "Agent created successfully", {
+      token,
+      agentId: newAgent._id,
+    });
   } catch (error) {
     console.log(error);
     return response.error(res, error.message);
@@ -102,7 +111,10 @@ exports.agentLogin = async (req, res) => {
 
     // Sign the jwt
     const token = jwt.signJwt({ _id: agent._id, agent: true });
-    return response.success(res, "Agent login successfully", { token });
+    return response.success(res, "Agent login successfully", {
+      token,
+      agentId: agent._id,
+    });
   } catch (error) {
     console.log(error);
     return response.error(res, error.message);

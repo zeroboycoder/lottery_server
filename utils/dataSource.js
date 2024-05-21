@@ -1,8 +1,9 @@
 const dataSources = {
-  fetchData: async (model, page, showPerPage, sort, options) => {
+  fetchData: async (model, page, showPerPage, sort, options, populates) => {
     try {
       const data = await model
         .find(options)
+        .populate(populates)
         .limit(showPerPage)
         .skip(showPerPage * (page - 1))
         .sort({ _id: sort === "desc" ? -1 : 1 })

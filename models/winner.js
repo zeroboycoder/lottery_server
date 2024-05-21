@@ -14,6 +14,23 @@ const winnerSchema = new mongoose.Schema(
       ref: "betting",
       required: true,
     },
+    agentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "agent",
+      required: true,
+    },
+    date: {
+      type: String,
+      required: true,
+    },
+    betAmount: {
+      type: Number,
+      required: true,
+    },
+    winningAmount: {
+      type: Number,
+      required: true,
+    },
     winningNumber: {
       type: String,
       required: true,

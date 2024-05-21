@@ -1,6 +1,7 @@
-const { bettingModel } = require("../models");
+const { bettingModel, betSettingModel } = require("../models");
 const response = require("../utils/response");
 const { fetchData } = require("../utils/dataSource");
+const moment = require("moment");
 
 exports.createBetting = async (req, res) => {
   try {
@@ -22,11 +23,24 @@ exports.createBetting = async (req, res) => {
 
 exports.fetchBetting = async (req, res) => {
   try {
+    const userId = req.userId;
+    const isAdmin = req.isAdmin;
     const { page = 1, showPerPage = 10, sort = "desc" } = req.query;
-    const results = await fetchData(bettingModel, page, showPerPage, sort);
+    const options = isAdmin
+      ? {}
+      : {
+          agentId: userId,
+        };
+    const results = await fetchData(
+      bettingModel,
+      page,
+      showPerPage,
+      sort,
+      options
+    );
     const data = [];
 
-    results?.data.map((result) => {
+    results?.data.map((result, i) => {
       let tempData = {};
       let betNumbers = [];
       let betAmount = 0;
@@ -39,6 +53,8 @@ exports.fetchBetting = async (req, res) => {
       );
 
       tempData = result;
+      tempData.id = ++i;
+      tempData.betDate = moment(result.createdAt).format("YYYY-MM-DD hh:mm a");
       tempData.betNumber = betNumbers;
       tempData.betAmount = betAmount;
       data.push(tempData);

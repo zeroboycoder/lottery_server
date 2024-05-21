@@ -28,6 +28,7 @@ exports.verifyJwt = async (req, res, next) => {
         .select("-createdAt -updatedAt -__v");
     }
     req.userId = decoded._id;
+    req.isAdmin = decoded.admin === true ? true : false;
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {

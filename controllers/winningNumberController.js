@@ -1,3 +1,4 @@
+const moment = require("moment");
 const { winningNumberModel, bettingModel, winnerModel } = require("../models");
 const response = require("../utils/response");
 const { fetchData } = require("../utils/dataSource");
@@ -15,6 +16,7 @@ exports.createWinningNumber = async (req, res) => {
     await winningNumberModel.create({
       winningNumber: number,
       tootNumbers,
+      date: moment().format("YYYY-MM-DD"),
     });
 
     // Find the winning betting
@@ -27,16 +29,24 @@ exports.createWinningNumber = async (req, res) => {
           },
         },
       })
-      .select("-betting -createdAt -updatedAt -__v");
+      .select("-createdAt -updatedAt -__v");
 
     // Create Winners
     await Promise.all(
       winningBetting.map(async (betting) => {
+        let betAmount;
+        betting.betting.filter((bet) => {
+          bet.betNumber === number ? (betAmount = bet.betAmount) : null;
+        });
         await winnerModel.create({
           playerName: betting.playerName,
           playerPhone: betting.playerPhone,
           bettingId: betting._id,
+          agentId: betting.agentId,
           winningNumber: number,
+          betAmount,
+          date: new Date(moment().format("YYYY-MM-DD")),
+          winningAmount: betAmount * 100,
         });
       })
     );
@@ -68,7 +78,7 @@ exports.getWinningNumber = async (req, res) => {
     );
     return response.success(
       res,
-      "Winning number created successfully",
+      "Fetched winning number successfully",
       results
     );
   } catch (error) {

@@ -5,4 +5,5 @@ module.exports = {
   bettingModel: require("./betting"),
   winningNumberModel: require("./winningNumber"),
   winnerModel: require("./winner"),
+  betSettingModel: require("./betSetting"),
 };
