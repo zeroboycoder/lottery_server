@@ -8,6 +8,18 @@ const betSettingSchema = new mongoose.Schema(
         unique: true,
       },
     ],
+    limitAmount: [
+      {
+        number: {
+          type: String,
+          required: true,
+        },
+        amount: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
   },
   {
     timestamps: true,
