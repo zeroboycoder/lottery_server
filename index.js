@@ -1,8 +1,17 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
+const http = require("http");
+const https = require("https");
+const fs = require("fs");
+const path = require("path");
 const mongoose = require("mongoose");
 const cors = require("cors");
+
+const options = {
+  key: fs.readFileSync(path.resolve(__dirname, "server.key")),
+  cert: fs.readFileSync(path.resolve(__dirname, "server.crt")),
+};
 
 const routes = require("./routes");
 
@@ -19,6 +28,7 @@ const port = process.env.PORT || 8000;
 mongoose
   .connect(uri)
   .then(() =>
-    app.listen(port, () => console.log(`Server is running at ${port}`))
+    // app.listen(port, () => console.log(`Server is running at ${port}`))
+    https.createServer(options, app).listen(443)
   )
   .catch((err) => console.log(err));
