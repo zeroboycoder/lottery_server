@@ -1,5 +1,10 @@
 const moment = require("moment");
-const { winningNumberModel, bettingModel, winnerModel } = require("../models");
+const {
+  winningNumberModel,
+  bettingModel,
+  winnerModel,
+  betSettingModel,
+} = require("../models");
 const response = require("../utils/response");
 const { fetchData } = require("../utils/dataSource");
 
@@ -10,6 +15,12 @@ exports.createWinningNumber = async (req, res) => {
     let lowerNum = parseInt(number) - 1;
     if (lowerNum < 100) lowerNum = "0" + lowerNum;
     let higherNum = parseInt(number) + 1;
+    const betSetting = await betSettingModel.findOne();
+    const odds = betSetting?.odds;
+
+    if (!odds) {
+      return response.error(res, "Please set odds first");
+    }
 
     tootNumbers = [lowerNum, higherNum];
     // Create a winner number
@@ -46,7 +57,7 @@ exports.createWinningNumber = async (req, res) => {
           winningNumber: number,
           betAmount,
           date: new Date(moment().format("YYYY-MM-DD")),
-          winningAmount: betAmount * 100,
+          winningAmount: betAmount * odds,
         });
       })
     );
