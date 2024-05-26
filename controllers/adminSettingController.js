@@ -126,7 +126,14 @@ exports.createLimitNumberAmount = async (req, res) => {
       });
     }
 
-    return response.success(res, "Added ban number successfully", {});
+    const updatedBetSetting = await betSettingModel.findOne();
+    const updatedAmount = updatedBetSetting?.limitAmount;
+
+    return response.success(
+      res,
+      "Added ban number successfully",
+      updatedAmount
+    );
   } catch (error) {
     console.log(error);
     return response.error(res, error.message);
@@ -150,7 +157,15 @@ exports.deleteLimitNumber = async (req, res) => {
       }
     );
 
-    return response.success(res, "Deleted limit number successfully", {});
+    console.log(req.body);
+    console.log(number);
+    console.log(newLimitAmount);
+
+    return response.success(
+      res,
+      "Deleted limit number successfully",
+      newLimitAmount
+    );
   } catch (error) {
     console.log(error);
     return response.error(res, error.message);
