@@ -6,9 +6,11 @@ const moment = require("moment");
 exports.createBetting = async (req, res) => {
   try {
     const { playerName, playerPhone, agentId, betting } = req.body;
+    const betSetting = await betSettingModel.findOne();
+    const banNumbers = betSetting?.banNumbers;
+    const limitAmounts = betSetting?.limitAmount;
 
     // Check the betting number is banned
-    const betSetting = await betSettingModel.findOne();
     let hasBanNumbers = [];
 
     if (betSetting) {
@@ -25,6 +27,55 @@ exports.createBetting = async (req, res) => {
       return response.error(
         res,
         `${hasBanNumbers.join(", ")} numbers are banned.`
+      );
+    }
+
+    // Check the limit amount
+    let isReachLimited = false;
+    const reachedNumber = [];
+    const limitedNumbers = [];
+    await Promise.all(
+      limitAmounts?.map((num) => {
+        return betting.map((bet) => {
+          if (bet.betNumber === num.number) {
+            limitedNumbers.push(num);
+          }
+        });
+      })
+    );
+    if (limitedNumbers?.length > 0) {
+      await Promise.all(
+        limitedNumbers.map(async (limitedNumber) => {
+          const totalBetDatas = await bettingModel.find({
+            isChecked: false,
+            betting: {
+              $elemMatch: {
+                betNumber: limitedNumber.number,
+              },
+            },
+          });
+
+          let alreadyBettingAmount = 0;
+
+          totalBetDatas.map((data) => {
+            return data.betting.map((b) => {
+              if (b.betNumber === limitedNumber.number)
+                alreadyBettingAmount += b.betAmount;
+            });
+          });
+
+          if (alreadyBettingAmount >= limitedNumber.amount) {
+            isReachLimited = isReachLimited || true;
+            reachedNumber.push(limitedNumber.number);
+          }
+        })
+      );
+    }
+
+    if (isReachLimited) {
+      return response.error(
+        res,
+        `${reachedNumber.join(", ")} numbers are reached the limit amount.`
       );
     }
 
