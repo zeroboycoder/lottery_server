@@ -5,7 +5,6 @@ const betSettingSchema = new mongoose.Schema(
     banNumbers: [
       {
         type: String,
-        unique: true,
       },
     ],
     limitAmount: [
@@ -20,6 +19,9 @@ const betSettingSchema = new mongoose.Schema(
         },
       },
     ],
+    odds: {
+      type: Number,
+    },
   },
   {
     timestamps: true,

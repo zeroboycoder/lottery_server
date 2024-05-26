@@ -171,3 +171,48 @@ exports.deleteLimitNumber = async (req, res) => {
     return response.error(res, error.message);
   }
 };
+
+// Betting Odds
+exports.getOdds = async (req, res) => {
+  try {
+    const betSetting = await betSettingModel.findOne();
+    const odds = betSetting?.odds;
+
+    return response.success(res, "Fetched odds successfully", odds);
+  } catch (error) {
+    console.log(error);
+    return response.error(res, error.message);
+  }
+};
+
+exports.createOdds = async (req, res) => {
+  try {
+    const { odds } = req.body;
+    const betSetting = await betSettingModel.findOne();
+
+    if (betSetting) {
+      const limitAmounts = betSetting?.limitAmount;
+
+      await betSettingModel.findByIdAndUpdate(
+        {
+          _id: betSetting._id,
+        },
+        {
+          odds,
+        }
+      );
+    } else {
+      await betSettingModel.create({
+        odds,
+      });
+    }
+
+    const updatedBetSetting = await betSettingModel.findOne();
+    const updateOdds = updatedBetSetting?.odds;
+
+    return response.success(res, "Update odds successfully", updateOdds);
+  } catch (error) {
+    console.log(error);
+    return response.error(res, error.message);
+  }
+};

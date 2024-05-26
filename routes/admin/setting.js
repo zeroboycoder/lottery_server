@@ -34,4 +34,8 @@ route.delete(
   adminSettingController.deleteLimitNumber
 );
 
+route.get("/odds", jwt.verifyJwt, adminSettingController.getOdds);
+
+route.post("/odds", jwt.verifyJwt, adminSettingController.createOdds);
+
 module.exports = route;
