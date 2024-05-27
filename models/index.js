@@ -6,4 +6,5 @@ module.exports = {
   winningNumberModel: require("./winningNumber"),
   winnerModel: require("./winner"),
   betSettingModel: require("./betSetting"),
+  transactionModel: require("./transaction"),
 };

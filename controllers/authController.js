@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const { adminModel, agentModel } = require("../models");
 const response = require("../utils/response");
 const jwt = require("../middlewares/jwt");
+const { fetchData } = require("../utils/dataSource");
 
 exports.adminRegister = async (req, res) => {
   try {
@@ -81,12 +82,8 @@ exports.agentRegister = async (req, res) => {
       password: hashedPassword,
     });
 
-    // Sign the jwt
-    const token = jwt.signJwt({ _id: newAgent._id, agent: true });
-    return response.success(res, "Agent created successfully", {
-      token,
-      agentId: newAgent._id,
-    });
+    const results = await fetchData(agentModel, 1, 10, "desc");
+    return response.success(res, "Agent created successfully", results);
   } catch (error) {
     console.log(error);
     return response.error(res, error.message);

@@ -6,6 +6,7 @@ const winnerRoute = require("./winner");
 const bettingRoute = require("./betting");
 const agentRoute = require("./agent");
 const adminSettingRoute = require("./setting");
+const transactionRoute = require("./transaction");
 
 route.use("/auth", authRoute);
 route.use("/winning-number", winningNumberRoute);
@@ -14,5 +15,6 @@ route.use("/winner", winnerRoute);
 route.use("/betting", bettingRoute);
 route.use("/agent", agentRoute);
 route.use("/setting", adminSettingRoute);
+route.use("/transaction", transactionRoute);
 
 module.exports = route;

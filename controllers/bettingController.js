@@ -7,8 +7,8 @@ exports.createBetting = async (req, res) => {
   try {
     const { playerName, playerPhone, agentId, betting } = req.body;
     const betSetting = await betSettingModel.findOne();
-    const banNumbers = betSetting?.banNumbers;
-    const limitAmounts = betSetting?.limitAmount;
+    const banNumbers = betSetting?.banNumbers || [];
+    const limitAmounts = betSetting?.limitAmount || [];
 
     // Check the betting number is banned
     let hasBanNumbers = [];
