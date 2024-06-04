@@ -27,8 +27,8 @@ const port = process.env.PORT || 8000;
 
 mongoose
   .connect(uri)
-  .then(() =>
-    // app.listen(port, () => console.log(`Server is running at ${port}`))
-    https.createServer(options, app).listen(443)
+  .then(
+    () => app.listen(port, () => console.log(`Server is running at ${port}`))
+    // https.createServer(options, app).listen(443)
   )
   .catch((err) => console.log(err));
