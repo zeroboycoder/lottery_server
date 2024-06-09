@@ -22,6 +22,9 @@ const betSettingSchema = new mongoose.Schema(
     odds: {
       type: Number,
     },
+    tootOdds: {
+      type: Number,
+    },
   },
   {
     timestamps: true,

@@ -31,51 +31,39 @@ exports.createBetting = async (req, res) => {
     }
 
     // Check the limit amount
-    let isReachLimited = false;
-    const reachedNumber = [];
-    const limitedNumbers = [];
+    let reachLimitAmount = false;
+    const reachLimitNumber = [];
+
     await Promise.all(
-      limitAmounts?.map((num) => {
-        return betting.map((bet) => {
-          if (bet.betNumber === num.number) {
-            limitedNumbers.push(num);
-          }
+      betting.map(async (bet) => {
+        const betDatas = await bettingModel.find({
+          betting: {
+            $elemMatch: {
+              betNumber: bet.betNumber,
+            },
+          },
         });
+        let totalBetAmount = 0;
+        betDatas.forEach((data) => {
+          const betAmount = data.betting.filter(
+            (b) => b.betNumber === bet.betNumber
+          )[0]?.betAmount;
+          totalBetAmount += betAmount;
+        });
+
+        // if the number reach 20000
+        if (totalBetAmount >= 20000) {
+          reachLimitAmount = true;
+          reachLimitNumber.push(bet.betNumber);
+        }
       })
     );
-    if (limitedNumbers?.length > 0) {
-      await Promise.all(
-        limitedNumbers.map(async (limitedNumber) => {
-          const totalBetDatas = await bettingModel.find({
-            isChecked: false,
-            betting: {
-              $elemMatch: {
-                betNumber: limitedNumber.number,
-              },
-            },
-          });
 
-          let alreadyBettingAmount = 0;
-
-          totalBetDatas.map((data) => {
-            return data.betting.map((b) => {
-              if (b.betNumber === limitedNumber.number)
-                alreadyBettingAmount += b.betAmount;
-            });
-          });
-
-          if (alreadyBettingAmount >= limitedNumber.amount) {
-            isReachLimited = isReachLimited || true;
-            reachedNumber.push(limitedNumber.number);
-          }
-        })
-      );
-    }
-
-    if (isReachLimited) {
+    // if reachLimitAmount true
+    if (reachLimitAmount) {
       return response.error(
         res,
-        `${reachedNumber.join(", ")} numbers are reached the limit amount.`
+        `${reachLimitNumber.join(", ")} reached limit.`
       );
     }
 

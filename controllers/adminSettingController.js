@@ -177,8 +177,12 @@ exports.getOdds = async (req, res) => {
   try {
     const betSetting = await betSettingModel.findOne();
     const odds = betSetting?.odds;
+    const tootOdds = betSetting?.tootOdds;
 
-    return response.success(res, "Fetched odds successfully", odds);
+    return response.success(res, "Fetched odds successfully", {
+      odds,
+      tootOdds,
+    });
   } catch (error) {
     console.log(error);
     return response.error(res, error.message);
@@ -187,23 +191,23 @@ exports.getOdds = async (req, res) => {
 
 exports.createOdds = async (req, res) => {
   try {
-    const { odds } = req.body;
+    const { odds, tootOdds } = req.body;
     const betSetting = await betSettingModel.findOne();
 
     if (betSetting) {
-      const limitAmounts = betSetting?.limitAmount;
-
       await betSettingModel.findByIdAndUpdate(
         {
           _id: betSetting._id,
         },
         {
           odds,
+          tootOdds,
         }
       );
     } else {
       await betSettingModel.create({
         odds,
+        tootOdds,
       });
     }
 

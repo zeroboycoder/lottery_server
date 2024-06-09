@@ -17,48 +17,101 @@ exports.createWinningNumber = async (req, res) => {
     let higherNum = parseInt(number) + 1;
     const betSetting = await betSettingModel.findOne();
     const odds = betSetting?.odds;
+    const tootOdds = betSetting?.tootOdds;
 
     if (!odds) {
       return response.error(res, "Please set odds first");
     }
+    if (!tootOdds) {
+      return response.error(res, "Please set toot odds first");
+    }
 
-    tootNumbers = [lowerNum, higherNum];
-    // Create a winner number
+    for (let i = 0; i < 3; i++) {
+      let numberStr = number + "";
+      if (i === 0) {
+        tootNumbers.push(numberStr[0] + numberStr[2] + numberStr[1]);
+      } else if (i === 1) {
+        tootNumbers.push(numberStr[1] + numberStr[0] + numberStr[2]);
+        tootNumbers.push(numberStr[1] + numberStr[2] + numberStr[0]);
+      } else if (i === 2) {
+        tootNumbers.push(numberStr[2] + numberStr[0] + numberStr[1]);
+        tootNumbers.push(numberStr[2] + numberStr[1] + numberStr[0]);
+      }
+    }
+    tootNumbers.push(lowerNum);
+    tootNumbers.push(higherNum);
+
+    // Create a winning number
     await winningNumberModel.create({
       winningNumber: number,
       tootNumbers,
       date: moment().format("YYYY-MM-DD"),
     });
 
-    // Find the winning betting
-    const winningBetting = await bettingModel
-      .find({
-        isChecked: false,
-        betting: {
-          $elemMatch: {
-            betNumber: number,
+    // Function for fetch the winning betting
+    const fetchWinnningBetting = async (num) => {
+      return await bettingModel
+        .find({
+          isChecked: false,
+          betting: {
+            $elemMatch: {
+              betNumber: num,
+            },
           },
-        },
-      })
-      .select("-createdAt -updatedAt -__v");
+        })
+        .select("-createdAt -updatedAt -__v");
+    };
 
-    // Create Winners
+    // Function for create winners
+    const createWinner = async (betting, betNumber, betAmount, type) => {
+      await winnerModel.create({
+        playerName: betting.playerName,
+        playerPhone: betting.playerPhone,
+        bettingId: betting._id,
+        agentId: betting.agentId,
+        winningNumber: betNumber,
+        betAmount,
+        date: new Date(moment().format("YYYY-MM-DD")),
+        winningAmount:
+          type === "direct" ? betAmount * odds : betAmount * tootOdds,
+        type,
+      });
+    };
+
+    // Find the direct winning betting
+    // if winning betting found, create the direct winners
+    const winningBettings = await fetchWinnningBetting(number);
+    if (winningBettings.length > 0) {
+      await Promise.all(
+        winningBettings.map(async (winningBetting) => {
+          const betAmount = winningBetting.betting.filter(
+            (bet) => bet.betNumber === number
+          )[0].betAmount;
+          await createWinner(winningBetting, number, betAmount, "direct");
+        })
+      );
+    }
+
+    // Find the toot winning betting
+    // if winning betting found, create the toot winners
     await Promise.all(
-      winningBetting.map(async (betting) => {
-        let betAmount;
-        betting.betting.filter((bet) => {
-          bet.betNumber === number ? (betAmount = bet.betAmount) : null;
-        });
-        await winnerModel.create({
-          playerName: betting.playerName,
-          playerPhone: betting.playerPhone,
-          bettingId: betting._id,
-          agentId: betting.agentId,
-          winningNumber: number,
-          betAmount,
-          date: new Date(moment().format("YYYY-MM-DD")),
-          winningAmount: betAmount * odds,
-        });
+      tootNumbers.map(async (tootNumber) => {
+        const tootWinningBettings = await fetchWinnningBetting(tootNumber);
+        if (tootWinningBettings.length > 0) {
+          await Promise.all(
+            tootWinningBettings.map(async (tootWinningBetting) => {
+              const betAmount = tootWinningBetting.betting.filter(
+                (bet) => bet.betNumber === tootNumber
+              )[0].betAmount;
+              await createWinner(
+                tootWinningBetting,
+                tootNumber,
+                betAmount,
+                "toot"
+              );
+            })
+          );
+        }
       })
     );
 
