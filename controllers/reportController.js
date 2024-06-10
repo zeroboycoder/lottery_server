@@ -97,8 +97,10 @@ exports.monthlyReportController = async (req, res) => {
 
     return response.success(res, "Fetched monthly report", {
       winningNumbers,
+      totalBetAmount: betingAmount[0]?.totalBetAmount,
       totalDirectWinningAmount,
       totalTootWinningAmount,
+      totalWinningAmount: totalDirectWinningAmount + totalTootWinningAmount,
       totalWinLose,
     });
   } catch (error) {

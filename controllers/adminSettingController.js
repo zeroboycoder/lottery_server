@@ -212,9 +212,13 @@ exports.createOdds = async (req, res) => {
     }
 
     const updatedBetSetting = await betSettingModel.findOne();
-    const updateOdds = updatedBetSetting?.odds;
+    const updatedOdds = updatedBetSetting?.odds;
+    const updatedTootOdds = updatedBetSetting?.tootOdds;
 
-    return response.success(res, "Update odds successfully", updateOdds);
+    return response.success(res, "Update odds successfully", {
+      odds: updatedOdds,
+      tootOdds: updatedTootOdds,
+    });
   } catch (error) {
     console.log(error);
     return response.error(res, error.message);
